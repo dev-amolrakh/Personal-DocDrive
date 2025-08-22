@@ -1,0 +1,3499 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DocDrive - Google Drive Document Manager</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <script
+      type="module"
+      src="https://cdn.jsdelivr.net/npm/ldrs/dist/auto/miyagi.js"
+    ></script>
+    <style>
+      :root {
+        --primary-color: #4285f4;
+        --secondary-color: #0f9d58;
+        --accent-color: #f4b400;
+        --danger-color: #db4437;
+        --light-bg: #f8f9fa;
+        --dark-bg: #202124;
+        --text-color: #3c4043;
+        --border-color: #dadce0;
+        --hover-color: #e8f0fe;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+          "Helvetica Neue", sans-serif;
+        background-color: var(--light-bg);
+        color: var(--text-color);
+        line-height: 1.6;
+        margin: 0;
+        padding: 0;
+      }
+
+      .header {
+        background-color: white;
+        padding: 15px 0;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+
+      .nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--primary-color);
+      }
+
+      .logo i {
+        margin-right: 10px;
+        font-size: 1.8rem;
+      }
+
+      .main-container {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 20px;
+        display: grid;
+        grid-template-columns: 250px 1fr;
+        gap: 20px;
+        position: relative;
+        min-height: calc(100vh - 100px);
+      }
+
+      .sidebar {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        position: sticky;
+        top: 75px;
+        height: calc(100vh - 120px);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .sidebar h3 {
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 1.1rem;
+      }
+
+      .sidebar ul {
+        list-style: none;
+        margin-bottom: 20px;
+      }
+
+      .sidebar li {
+        margin-bottom: 10px;
+        font-size: 0.95rem;
+      }
+
+      .sidebar li a {
+        display: flex;
+        align-items: center;
+        color: var(--text-color);
+        text-decoration: none;
+        padding: 8px 10px;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+      }
+
+      .sidebar li a:hover,
+      .sidebar li a.active {
+        background-color: var(--hover-color);
+        color: var(--primary-color);
+      }
+
+      .sidebar li a i {
+        margin-right: 10px;
+        width: 18px;
+        text-align: center;
+      }
+
+      .content {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        max-height: calc(100vh - 120px);
+        overflow-y: auto;
+        position: relative;
+      }
+
+      .content-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--border-color);
+        position: sticky;
+        top: -19px;
+        background-color: white;
+        z-index: 5;
+        padding-top: 5px;
+      }
+
+      .content-header h2 {
+        font-size: 1.5rem;
+        color: var(--text-color);
+        font-weight: 500;
+      }
+
+      .upload-btn {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 20px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        transition: background-color 0.2s;
+      }
+
+      .upload-btn:hover {
+        background-color: #3367d6;
+      }
+
+      .upload-btn i {
+        margin-right: 8px;
+      }
+
+      .tab-container {
+        display: flex;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .tab {
+        padding: 10px 20px;
+        cursor: pointer;
+        font-weight: 500;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s;
+      }
+
+      .tab.active {
+        color: var(--primary-color);
+        border-bottom-color: var(--primary-color);
+      }
+
+      .tab:hover:not(.active) {
+        border-bottom-color: var(--border-color);
+      }
+
+      .file-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 20px;
+      }
+
+      .file-card {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: transform 0.2s, box-shadow 0.2s;
+        cursor: pointer;
+        position: relative;
+        background-color: white;
+      }
+
+      .file-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .file-thumbnail {
+        height: 130px;
+        background-color: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .file-thumbnail i {
+        font-size: 3rem;
+        color: var(--text-color);
+      }
+
+      .file-info {
+        padding: 12px;
+      }
+
+      .file-name {
+        font-weight: 500;
+        margin-bottom: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .file-meta {
+        font-size: 0.8rem;
+        color: #70757a;
+      }
+
+      .file-list {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .file-list th,
+      .file-list td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .file-list th {
+        font-weight: 500;
+        color: #5f6368;
+        font-size: 0.9rem;
+      }
+
+      .file-list tr:last-child td {
+        border-bottom: none;
+      }
+
+      .file-list tr:hover {
+        background-color: var(--hover-color);
+      }
+
+      .file-icon {
+        display: flex;
+        align-items: center;
+      }
+
+      .file-icon i {
+        font-size: 1.5rem;
+        margin-right: 10px;
+      }
+
+      .img-icon {
+        color: #ff9500;
+      }
+      .pdf-icon {
+        color: #db4437;
+      }
+      .doc-icon {
+        color: #4285f4;
+      }
+      .video-icon {
+        color: #0f9d58;
+      }
+      .audio-icon {
+        color: #673ab7;
+      }
+      .other-icon {
+        color: #607d8b;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 200;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        animation: fadeIn 0.2s;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .modal-content {
+        background-color: white;
+        margin: 50px auto;
+        max-width: 600px;
+        width: 90%;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        position: relative;
+        animation: slideDown 0.3s;
+      }
+
+      @keyframes slideDown {
+        from {
+          transform: translateY(-50px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .modal-header {
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .modal-header h3 {
+        font-size: 1.2rem;
+        font-weight: 500;
+        color: var(--text-color);
+      }
+
+      .close-modal {
+        background: transparent;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #70757a;
+      }
+
+      .modal-body {
+        padding: 20px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        font-size: 0.9rem;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+      }
+
+      .form-control:focus {
+        outline: none;
+        border-color: var(--primary-color);
+      }
+
+      .file-input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background-color: white;
+      }
+
+      .file-preview-area {
+        margin-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .file-preview {
+        display: flex;
+        align-items: center;
+        background-color: #f5f5f5;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 5px 10px;
+        font-size: 0.9rem;
+      }
+
+      .file-preview i {
+        margin-right: 8px;
+      }
+
+      .modal-footer {
+        padding: 15px 20px;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .btn {
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+      }
+
+      .btn-primary:hover {
+        background-color: #3367d6;
+      }
+
+      .btn-secondary {
+        background-color: white;
+        color: var(--text-color);
+        border: 1px solid var(--border-color);
+        margin-right: 10px;
+      }
+
+      .btn-secondary:hover {
+        background-color: var(--light-bg);
+      }
+
+      .loading {
+        display: none;
+        margin-top: 20px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-radius: 50%;
+        border-top: 4px solid var(--primary-color);
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 10px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .status-message {
+        margin-top: 20px;
+        padding: 10px;
+        border-radius: 4px;
+        display: none;
+      }
+
+      .success {
+        background-color: #d4edda;
+        color: #155724;
+      }
+
+      .error {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 40px 0;
+        color: #70757a;
+      }
+
+      .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        color: var(--border-color);
+      }
+
+      .empty-state p {
+        font-size: 1.1rem;
+        margin-bottom: 20px;
+      }
+
+      .file-preview-modal {
+        display: none;
+        position: fixed;
+        z-index: 300;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.85);
+        animation: fadeIn 0.2s;
+      }
+
+      .file-preview-content {
+        margin: 40px auto;
+        width: 90%;
+        max-width: 1000px;
+        height: calc(100% - 80px);
+        background-color: white;
+        border-radius: 8px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .file-preview-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background-color: var(--dark-bg);
+        color: white;
+      }
+
+      .file-preview-body {
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+        background-color: #f5f5f5;
+      }
+
+      .file-preview-iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+
+      .file-preview-image {
+        max-width: 100%;
+        max-height: 100%;
+        margin: auto;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        object-fit: contain;
+      }
+
+      .file-preview-actions {
+        display: flex;
+        gap: 15px;
+      }
+
+      .action-btn {
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: color 0.2s;
+        display: flex;
+        align-items: center;
+      }
+
+      .action-btn:hover {
+        color: var(--accent-color);
+      }
+
+      .folders-list {
+        margin-bottom: 15px;
+        overflow-y: auto;
+        flex: 1;
+      }
+
+      .folder-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 10px;
+        margin-bottom: 5px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .folder-item:hover {
+        background-color: var(--hover-color);
+      }
+
+      .folder-item.active {
+        background-color: var(--hover-color);
+        color: var(--primary-color);
+      }
+
+      .folder-item i {
+        margin-right: 10px;
+        color: var(--accent-color);
+      }
+
+      /* File context menu */
+      .file-actions {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        z-index: 5;
+        display: flex;
+        gap: 5px;
+      }
+
+      .file-actions-btn {
+        background: transparent;
+        border: none;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: #5f6368;
+        transition: all 0.2s;
+      }
+      .file-actions-btn:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+        transform: scale(1.1);
+      }
+      .download-btn {
+        color: var(--primary-color);
+      }
+      .download-btn:hover {
+        color: #3367d6;
+      }
+
+      .file-context-menu {
+        position: absolute;
+        background: white;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
+        min-width: 180px;
+        z-index: 10;
+        display: none;
+      }
+
+      .context-menu-item {
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .context-menu-item:hover {
+        background-color: var(--hover-color);
+      }
+
+      .context-menu-item i {
+        margin-right: 8px;
+        width: 20px;
+        text-align: center;
+      }
+
+      .context-menu-separator {
+        height: 1px;
+        background-color: var(--border-color);
+        margin: 4px 0;
+      }
+
+      /* Color labels */
+      .color-selector,
+      .folder-color-selector {
+        display: flex;
+        padding: 8px;
+        flex-wrap: wrap;
+        gap: 5px;
+      }
+
+      .color-option {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid transparent;
+      }
+
+      .color-option:hover {
+        border-color: #5f6368;
+      }
+
+      .color-option.active {
+        border-color: #333;
+      }
+
+      .file-color-indicator {
+        position: absolute;
+        top: 0;
+        display: none;
+        left: 0;
+        width: 20px;
+        height: 40px;
+        border-top-right-radius: 3px;
+        border-bottom-right-radius: 3px;
+        z-index: 2;
+      }
+
+      .file-details-row {
+        margin-bottom: 15px;
+      }
+
+      .file-details-row h4 {
+        margin-bottom: 5px;
+        color: #5f6368;
+        font-weight: 500;
+        font-size: 0.9rem;
+      }
+
+      .file-details-row p {
+        margin: 0;
+      }
+
+      /* Responsive design */
+      @media (max-width: 768px) {
+        .main-container {
+          grid-template-columns: 1fr;
+        }
+
+        .file-grid {
+          grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        }
+
+        .file-list th:nth-child(3),
+        .file-list td:nth-child(3) {
+          display: none;
+        }
+      }
+
+      #viewModeToggle {
+        display: flex;
+        gap: 10px;
+        margin-left: 20px;
+      }
+
+      .view-btn {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: #70757a;
+        transition: color 0.2s;
+      }
+
+      .view-btn.active {
+        color: var(--primary-color);
+      }
+
+      .view-btn:hover:not(.active) {
+        color: var(--text-color);
+      }
+
+      .search-container {
+        display: flex;
+        align-items: center;
+        background-color: var(--light-bg);
+        border-radius: 24px;
+        padding: 5px 15px;
+        width: 300px;
+        transition: box-shadow 0.2s;
+      }
+
+      .search-container:focus-within {
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+      }
+
+      .search-container i {
+        color: #5f6368;
+        margin-right: 10px;
+      }
+
+      .search-input {
+        border: none;
+        background: transparent;
+        flex: 1;
+        padding: 8px 0;
+        font-size: 0.9rem;
+        outline: none;
+      }
+
+      /* Spinner Overlay for Any Action */
+      .global-loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+      }
+
+      .global-loader-content {
+        background-color: white;
+        padding: 20px 30px;
+        border-radius: 8px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .global-loader p {
+        color: var(--text-color);
+        font-size: 1.2rem;
+        font-weight: 500;
+      }
+
+      /* File and Folder Context Menus */
+      .file-context-menu {
+        position: absolute;
+        background: white;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        border-radius: 4px;
+        min-width: 180px;
+        z-index: 10;
+        display: none;
+      }
+
+      .context-menu-item {
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .context-menu-item:hover {
+        background-color: var(--hover-color);
+      }
+
+      .context-menu-item i {
+        margin-right: 8px;
+        width: 20px;
+        text-align: center;
+      }
+
+      .context-menu-separator {
+        height: 1px;
+        background-color: var(--border-color);
+        margin: 4px 0;
+      }
+
+      /* Loader styles for consistency */
+      l-miyagi {
+        display: inline-block;
+      }
+
+      /* Bookmark-style label */
+      .file-bookmark {
+        position: absolute;
+        top: -8px;
+        left: 15px;
+        width: 25px;
+        height: 35px;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 85%, 0 100%);
+        z-index: 2;
+        box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .file-bookmark::after {
+        /*content: "★"; */
+        color: white;
+        font-size: 14px;
+        margin-top: -5px;
+      }
+
+      .list-bookmark {
+        position: absolute;
+        display: none;
+        left: 10px;
+        top: 2px;
+        width: 25px;
+        height: 22px;
+        margin-right: 8px;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 85%, 0 100%);
+      }
+
+      .list-bookmark::after {
+        /*content: "★"; */
+        color: white;
+        font-size: 10px;
+        position: none;
+        top: 2px;
+        left: 3px;
+      }
+
+      /* Add share tabs styles */
+      .share-tabs {
+        display: flex;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 20px;
+      }
+
+      .share-tab {
+        padding: 10px 20px;
+        cursor: pointer;
+        font-weight: 500;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s;
+      }
+
+      .share-tab.active {
+        color: var(--primary-color);
+        border-bottom-color: var(--primary-color);
+      }
+
+      .share-tab:hover:not(.active) {
+        border-bottom-color: var(--border-color);
+      }
+
+      .share-tab i {
+        margin-right: 8px;
+      }
+
+      .share-content {
+        padding: 15px 0;
+      }
+
+      /* Social sharing buttons */
+      .social-share-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+
+      .social-btn {
+        padding: 10px 15px;
+        border-radius: 4px;
+        border: none;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 500;
+        transition: opacity 0.2s;
+        width: 48%;
+      }
+
+      .social-btn i {
+        margin-right: 8px;
+        font-size: 1.2rem;
+      }
+
+      .social-btn:hover {
+        opacity: 0.9;
+      }
+
+      .whatsapp-btn {
+        background-color: #25d366;
+      }
+
+      .facebook-btn {
+        background-color: #4267b2;
+      }
+
+      .twitter-btn {
+        background-color: #1da1f2;
+      }
+
+      .linkedin-btn {
+        background-color: #0077b5;
+      }
+
+      .color-label {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        margin: 5px;
+        z-index: 2;
+      }
+
+      /* Enhanced bookmark label appearance */
+      .bookmark-label {
+        position: absolute;
+        bottom: 6px;
+        right: 6px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        z-index: 3;
+        background-color: white;
+      }
+
+      .bookmark-label i {
+        color: #f4b400; /* star color */
+        font-size: 14px;
+      }
+
+      .list-view .bookmark-label {
+        position: absolute;
+        top: 10px !important;
+        /*transform: translateY(-50%); */
+        left: 50px !important; /* Position for list view */
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header">
+      <div class="nav-container">
+        <div class="logo">
+          <i class="fas fa-cloud"></i>
+          <span>DocDrive</span>
+        </div>
+        <div class="search-container">
+          <i class="fas fa-search"></i>
+          <input
+            type="text"
+            id="searchInput"
+            class="search-input"
+            placeholder="Search files..."
+          />
+          <button
+            id="clearSearch"
+            class="clear-search"
+            style="
+              display: none;
+              background: none;
+              border: none;
+              cursor: pointer;
+            "
+          >
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="main-container">
+      <aside class="sidebar">
+        <h3>My Drive</h3>
+        <ul>
+          <li>
+            <a href="#" class="active" id="homeTab"
+              ><i class="fas fa-home"></i> Home</a
+            >
+          </li>
+          <li>
+            <a href="#" id="recentTab"><i class="fas fa-clock"></i> Recent</a>
+          </li>
+          <li>
+            <a href="#" id="starredTab"><i class="fas fa-star"></i> Starred</a>
+          </li>
+          <li>
+            <a href="#" id="trashTab"><i class="fas fa-trash"></i> Trash</a>
+          </li>
+        </ul>
+
+        <h3>Folders</h3>
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+          "
+        >
+          <button
+            id="createFolderBtn"
+            class="btn btn-secondary"
+            style="padding: 5px 10px; font-size: 0.85rem"
+          >
+            <i class="fas fa-folder-plus"></i> New Folder
+          </button>
+        </div>
+        <div id="foldersList" class="folders-list">
+          <!-- Folders will be populated here -->
+        </div>
+      </aside>
+
+      <main class="content">
+        <div class="content-header">
+          <div style="display: flex; align-items: center; gap: 15px">
+            <h2>My Documents</h2>
+           
+          </div>
+           <div id="viewModeToggle">
+              <button
+                class="view-btn active"
+                data-view="grid"
+                title="Grid View"
+              >
+                <i class="fas fa-th"></i>
+              </button>
+              <button class="view-btn" data-view="list" title="List View">
+                <i class="fas fa-list"></i>
+              </button>
+               <button class="upload-btn" id="showUploadModal">
+              <i class="fas fa-cloud-upload-alt"></i> Upload Files
+            </button>
+            </div>
+        </div>
+
+        <div class="tab-container">
+          <div class="tab active" data-type="all">All Files</div>
+          <div class="tab" data-type="documents">Documents</div>
+          <div class="tab" data-type="images">Images</div>
+          <div class="tab" data-type="videos">Videos</div>
+        </div>
+
+        <div id="filesContainer" class="file-grid">
+          <!-- Files will be displayed here -->
+          <div class="empty-state">
+            <i class="fas fa-folder-open"></i>
+            <p>No files found in this folder</p>
+            <button class="upload-btn" id="emptyStateUploadBtn">
+              <i class="fas fa-cloud-upload-alt"></i> Upload Files
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Upload Files</h3>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <form id="uploadForm">
+            <div class="form-group">
+              <label for="folderSelect">Select Folder</label>
+              <select id="folderSelect" class="form-control">
+                <option value="Uploads">Uploads</option>
+                <!-- Other folders will be populated dynamically -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="fileInput">Select Files</label>
+              <input type="file" id="fileInput" class="file-input" multiple />
+              <div id="filePreviewArea" class="file-preview-area">
+                <!-- File previews will appear here -->
+              </div>
+            </div>
+            <div id="uploadLoading" class="loading">
+              <l-miyagi
+                size="30"
+                stroke="3.5"
+                speed="0.9"
+                color="black"
+              ></l-miyagi>
+              <p>Uploading files to Google Drive...</p>
+            </div>
+            <div id="statusMessage" class="status-message">
+              <!-- Status messages will appear here -->
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="cancelUpload">Cancel</button>
+          <button class="btn btn-primary" id="submitUpload">Upload</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- File Preview Modal -->
+    <div id="filePreviewModal" class="file-preview-modal">
+      <div class="file-preview-content">
+        <div class="file-preview-header">
+          <h3 id="previewFileName">File Name</h3>
+          <div class="file-preview-actions">
+            <button class="action-btn" id="downloadFile" title="Download">
+              <i class="fas fa-download"></i>
+            </button>
+            <button class="action-btn" id="openInDrive" title="Open in Drive">
+              <i class="fas fa-external-link-alt"></i>
+            </button>
+            <button class="action-btn" id="closePreview" title="Close">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <div class="file-preview-body">
+          <div
+            id="previewLoading"
+            style="
+              display: none;
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              text-align: center;
+            "
+          >
+            <l-miyagi
+              size="40"
+              stroke="3.5"
+              speed="0.9"
+              color="black"
+              style="margin-bottom: 15px"
+            ></l-miyagi>
+            <p>Loading preview...</p>
+          </div>
+          <iframe
+            id="previewIframe"
+            class="file-preview-iframe"
+            style="display: none"
+          ></iframe>
+          <img
+            id="previewImage"
+            class="file-preview-image"
+            style="display: none"
+            alt="File preview"
+          />
+          <video
+            id="previewVideo"
+            controls
+            class="file-preview-iframe"
+            style="display: none"
+          ></video>
+          <div
+            id="unsupportedPreview"
+            style="display: none; text-align: center; padding: 20px"
+          >
+            <i
+              class="fas fa-exclamation-circle"
+              style="font-size: 3rem; color: #70757a; margin-bottom: 15px"
+            ></i>
+            <p>Preview not available for this file type</p>
+            <a
+              id="directDownloadLink"
+              class="btn btn-primary"
+              style="display: inline-block; margin-top: 15px"
+            >
+              Download File
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Folder Modal -->
+    <div id="createFolderModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Create New Folder</h3>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="folderName">Folder Name</label>
+            <input
+              type="text"
+              id="folderName"
+              class="form-control"
+              placeholder="Enter folder name"
+            />
+          </div>
+          <div id="folderStatusMessage" class="status-message">
+            <!-- Status messages will appear here -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="cancelCreateFolder">
+            Cancel
+          </button>
+          <button class="btn btn-primary" id="submitCreateFolder">
+            Create
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- File Rename Modal -->
+    <div id="renameModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Rename File</h3>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="newFileName">New File Name</label>
+            <input
+              type="text"
+              id="newFileName"
+              class="form-control"
+              placeholder="Enter new file name"
+            />
+            <input type="hidden" id="renameFileId" />
+          </div>
+          <div id="renameStatusMessage" class="status-message">
+            <!-- Status messages will appear here -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="cancelRename">Cancel</button>
+          <button class="btn btn-primary" id="submitRename">Rename</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Move File Modal -->
+    <div id="moveFileModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Move File</h3>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="targetFolderSelect">Select Destination Folder</label>
+            <select id="targetFolderSelect" class="form-control">
+              <!-- Folders will be populated dynamically -->
+            </select>
+            <input type="hidden" id="moveFileId" />
+          </div>
+          <div id="moveStatusMessage" class="status-message">
+            <!-- Status messages will appear here -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="cancelMove">Cancel</button>
+          <button class="btn btn-primary" id="submitMove">Move</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Share File Modal -->
+    <div id="shareFileModal" class="modal">
+      <div class="modal-content" style="max-width: 700px">
+        <div class="modal-header">
+          <h3>Share File</h3>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="share-tabs">
+            <div class="share-tab active" data-tab="email">
+              <i class="fas fa-envelope"></i> Email
+            </div>
+            <div class="share-tab" data-tab="link">
+              <i class="fas fa-link"></i> Get Link
+            </div>
+            <div class="share-tab" data-tab="social">
+              <i class="fas fa-share-alt"></i> Social Media
+            </div>
+          </div>
+
+          <div class="share-content" id="emailShare">
+            <div class="form-group">
+              <label for="shareEmail">Email Address</label>
+              <input
+                type="email"
+                id="shareEmail"
+                class="form-control"
+                placeholder="Enter email address"
+              />
+              <input type="hidden" id="shareFileId" />
+              <input type="hidden" id="shareFileName" />
+            </div>
+            <div class="form-group">
+              <label for="shareRole">Permission</label>
+              <select id="shareRole" class="form-control">
+                <option value="reader">Can view</option>
+                <option value="commenter">Can comment</option>
+                <option value="writer">Can edit</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" id="submitEmailShare">
+              <i class="fas fa-paper-plane"></i> Send Email
+            </button>
+          </div>
+
+          <div class="share-content" id="linkShare" style="display: none">
+            <div class="form-group">
+              <label for="shareLinkInput">Share Link</label>
+              <div style="display: flex; gap: 10px">
+                <input
+                  type="text"
+                  id="shareLinkInput"
+                  class="form-control"
+                  readonly
+                  style="flex: 1"
+                />
+                <button class="btn btn-primary" id="copyLinkBtn">
+                  <i class="fas fa-copy"></i> Copy
+                </button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Link Permissions</label>
+              <select id="linkPermission" class="form-control">
+                <option value="reader">Anyone with link can view</option>
+                <option value="commenter">Anyone with link can comment</option>
+                <option value="writer">Anyone with link can edit</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" id="generateLinkBtn">
+              <i class="fas fa-magic"></i> Generate Shareable Link
+            </button>
+          </div>
+
+          <div class="share-content" id="socialShare" style="display: none">
+            <div class="social-share-buttons">
+              <button class="social-btn whatsapp-btn" id="whatsappShareBtn">
+                <i class="fab fa-whatsapp"></i> Share on WhatsApp
+              </button>
+              <button class="social-btn facebook-btn" id="facebookShareBtn">
+                <i class="fab fa-facebook-f"></i> Share on Facebook
+              </button>
+              <button class="social-btn twitter-btn" id="twitterShareBtn">
+                <i class="fab fa-twitter"></i> Share on Twitter
+              </button>
+              <button class="social-btn linkedin-btn" id="linkedinShareBtn">
+                <i class="fab fa-linkedin-in"></i> Share on LinkedIn
+              </button>
+            </div>
+          </div>
+
+          <div id="shareStatusMessage" class="status-message">
+            <!-- Status messages will appear here -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- File Details Modal -->
+    <div id="fileDetailsModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>File Details</h3>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="fileDetailsContent">
+            <!-- File details will be populated here -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" id="closeDetails">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- File Context Menu -->
+    <div id="fileContextMenu" class="file-context-menu">
+      <div class="context-menu-item" id="contextPreview">
+        <i class="fas fa-eye"></i> Preview
+      </div>
+      <div class="context-menu-item" id="contextRename">
+        <i class="fas fa-edit"></i> Rename
+      </div>
+      <div class="context-menu-item" id="contextShare">
+        <i class="fas fa-share-alt"></i> Share
+      </div>
+      <div class="context-menu-item" id="contextMove">
+        <i class="fas fa-folder-plus"></i> Move
+      </div>
+      <div class="context-menu-item" id="contextDetails">
+        <i class="fas fa-info-circle"></i> Details
+      </div>
+      <div class="context-menu-separator"></div>
+      <div class="context-menu-item" id="contextFavorite">
+        <i class="fas fa-star"></i> Add to Favorites
+      </div>
+      <div class="context-menu-item" id="contextColorLabel">
+        <i class="fas fa-palette"></i> Color Label
+        <div class="color-selector" style="display: none">
+          <div
+            class="color-option"
+            style="background-color: transparent"
+            data-color="none"
+          ></div>
+          <div
+            class="color-option"
+            style="background-color: #4285f4"
+            data-color="#4285f4"
+          ></div>
+          <div
+            class="color-option"
+            style="background-color: #0f9d58"
+            data-color="#0f9d58"
+          ></div>
+          <div
+            class="color-option"
+            style="background-color: #f4b400"
+            data-color="#f4b400"
+          ></div>
+          <div
+            class="color-option"
+            style="background-color: #db4437"
+            data-color="#db4437"
+          ></div>
+          <div
+            class="color-option"
+            style="background-color: #673ab7"
+            data-color="#673ab7"
+          ></div>
+        </div>
+      </div>
+      <div class="context-menu-separator"></div>
+      <div class="context-menu-item" id="contextDelete">
+        <i class="fas fa-trash"></i> Move to Trash
+      </div>
+    </div>
+
+    <!-- Spinner Overlay for Any Action -->
+    <div id="globalLoader" class="global-loader" style="display: none">
+      <div class="global-loader-content">
+        <l-miyagi size="35" stroke="3.5" speed="0.9" color="black"></l-miyagi>
+        <p id="loaderMessage">Processing...</p>
+      </div>
+    </div>
+
+    <!-- Folder Context Menu -->
+    <div id="folderContextMenu" class="file-context-menu">
+      <div class="context-menu-item" id="folderRename">
+        <i class="fas fa-edit"></i> Rename Folder
+      </div>
+      <div class="context-menu-item" id="folderColor">
+        <i class="fas fa-palette"></i> Folder Color
+        <div class="folder-color-selector" style="display: none">
+          <div
+            class="color-option"
+            style="background-color: transparent"
+            data-color="none"
+          ></div>
+          <div
+            class="color-option"
+            style="background-color: #4285f4"
+            data-color="#4285f4"
+          ></div>
+          <div
+            class="color-option"
+            style="background-color: #0f9d58"
+            data-color="#0f9d58"
+          ></div>
+          <div
+            class="color-option"
+            style="background-color: #f4b400"
+            data-color="#f4b400"
+          ></div>
+          <div
+            class="color-option"
+            style="background-color: #db4437"
+            data-color="#db4437"
+          ></div>
+          <div
+            class="color-option"
+            style="background-color: #673ab7"
+            data-color="#673ab7"
+          ></div>
+        </div>
+      </div>
+      <div class="context-menu-item" id="folderDelete">
+        <i class="fas fa-trash"></i> Delete Folder
+      </div>
+    </div>
+
+    <!-- Folder Rename Modal -->
+    <div id="folderRenameModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Rename Folder</h3>
+          <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="newFolderName">New Folder Name</label>
+            <input
+              type="text"
+              id="newFolderName"
+              class="form-control"
+              placeholder="Enter new folder name"
+            />
+            <input type="hidden" id="renameFolderId" />
+            <input type="hidden" id="renameFolderOldName" />
+          </div>
+          <div id="folderRenameStatusMessage" class="status-message">
+            <!-- Status messages will appear here -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" id="cancelFolderRename">
+            Cancel
+          </button>
+          <button class="btn btn-primary" id="submitFolderRename">
+            Rename
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // DOM Elements
+        const filesContainer = document.getElementById("filesContainer");
+        const foldersList = document.getElementById("foldersList");
+        const uploadModal = document.getElementById("uploadModal");
+        const filePreviewModal = document.getElementById("filePreviewModal");
+        const createFolderModal = document.getElementById("createFolderModal");
+        const renameModal = document.getElementById("renameModal");
+        const moveFileModal = document.getElementById("moveFileModal");
+        const shareFileModal = document.getElementById("shareFileModal");
+        const fileDetailsModal = document.getElementById("fileDetailsModal");
+        const folderRenameModal = document.getElementById("folderRenameModal");
+        const fileContextMenu = document.getElementById("fileContextMenu");
+        const folderContextMenu = document.getElementById("folderContextMenu");
+        const globalLoader = document.getElementById("globalLoader");
+        const loaderMessage = document.getElementById("loaderMessage");
+        const uploadForm = document.getElementById("uploadForm");
+        const fileInput = document.getElementById("fileInput");
+        const filePreviewArea = document.getElementById("filePreviewArea");
+        const folderSelect = document.getElementById("folderSelect");
+        const targetFolderSelect =
+          document.getElementById("targetFolderSelect");
+        const searchInput = document.getElementById("searchInput");
+        const tabs = document.querySelectorAll(".tab");
+        const viewButtons = document.querySelectorAll(".view-btn");
+
+        // Current state
+        let currentFolder = "Uploads";
+        let currentView = "grid";
+        let currentFilter = "all";
+        let allFiles = [];
+        let allFolders = [];
+        let trashFolder = null;
+        let currentTab = "home"; // New state to track active tab
+
+        // Initialize
+        loadFolders();
+        loadFiles();
+        setupEventListeners();
+
+        function setupEventListeners() {
+          // Existing event listeners
+          document
+            .getElementById("showUploadModal")
+            .addEventListener("click", () => {
+              uploadModal.style.display = "block";
+            });
+
+          document
+            .getElementById("emptyStateUploadBtn")
+            ?.addEventListener("click", () => {
+              uploadModal.style.display = "block";
+            });
+
+          document.querySelectorAll(".close-modal").forEach((button) => {
+            button.addEventListener("click", (e) => {
+              e.target.closest(".modal").style.display = "none";
+            });
+          });
+
+          document
+            .getElementById("cancelUpload")
+            .addEventListener("click", () => {
+              uploadModal.style.display = "none";
+            });
+
+          document
+            .getElementById("closePreview")
+            .addEventListener("click", () => {
+              filePreviewModal.style.display = "none";
+            });
+
+          document
+            .getElementById("submitUpload")
+            .addEventListener("click", uploadFiles);
+
+          fileInput.addEventListener("change", updateFilePreview);
+          searchInput.addEventListener("input", handleSearchInput);
+
+          document
+            .getElementById("clearSearch")
+            .addEventListener("click", function () {
+              searchInput.value = "";
+              this.style.display = "none";
+              filterFiles();
+            });
+
+          tabs.forEach((tab) => {
+            tab.addEventListener("click", () => {
+              tabs.forEach((t) => t.classList.remove("active"));
+              tab.classList.add("active");
+              currentFilter = tab.dataset.type;
+              filterFiles();
+            });
+          });
+
+          viewButtons.forEach((btn) => {
+            btn.addEventListener("click", () => {
+              viewButtons.forEach((b) => b.classList.remove("active"));
+              btn.classList.add("active");
+              currentView = btn.dataset.view;
+              updateView();
+            });
+          });
+
+          // Create folder button
+          document
+            .getElementById("createFolderBtn")
+            .addEventListener("click", () => {
+              createFolderModal.style.display = "block";
+            });
+
+          // Create folder submission
+          document
+            .getElementById("submitCreateFolder")
+            .addEventListener("click", createNewFolder);
+          document
+            .getElementById("cancelCreateFolder")
+            .addEventListener("click", () => {
+              createFolderModal.style.display = "none";
+            });
+
+          // Setup folder context menu event handlers
+          document
+            .getElementById("folderRename")
+            .addEventListener("click", function () {
+              const folderId = folderContextMenu.dataset.folderId;
+              const folderName = folderContextMenu.dataset.folderName;
+
+              // Set values in folder rename modal
+              document.getElementById("renameFolderId").value = folderId;
+              document.getElementById("renameFolderOldName").value = folderName;
+              document.getElementById("newFolderName").value = folderName;
+
+              // Show folder rename modal
+              folderRenameModal.style.display = "block";
+              folderContextMenu.style.display = "none";
+
+              // Focus on input
+              document.getElementById("newFolderName").focus();
+            });
+
+          document
+            .getElementById("folderDelete")
+            .addEventListener("click", function () {
+              const folderId = folderContextMenu.dataset.folderId;
+              const folderName = folderContextMenu.dataset.folderName;
+
+              // Confirm deletion
+              if (
+                confirm(
+                  `Delete folder "${folderName}"? This will move all contents to trash.`
+                )
+              ) {
+                // Show loader
+                showLoader(`Deleting folder "${folderName}"...`);
+
+                // Call API to delete folder
+                fetch(`/trash-file?fileId=${folderId}`, {
+                  method: "POST",
+                })
+                  .then((response) => response.json())
+                  .then((data) => {
+                    if (data.success) {
+                      // Reload folders and files
+                      loadFolders();
+                      loadFiles();
+                    } else {
+                      alert("Failed to delete folder: " + data.error);
+                    }
+                  })
+                  .catch((error) => {
+                    console.error("Error deleting folder:", error);
+                    alert("Error deleting folder. Please try again.");
+                  })
+                  .finally(() => {
+                    hideLoader();
+                  });
+              }
+
+              folderContextMenu.style.display = "none";
+            });
+
+          // Add folder rename submit handler
+          document
+            .getElementById("submitFolderRename")
+            .addEventListener("click", function () {
+              const folderId = document.getElementById("renameFolderId").value;
+              const oldName = document.getElementById(
+                "renameFolderOldName"
+              ).value;
+              const newName = document.getElementById("newFolderName").value;
+
+              if (!newName || newName.trim() === "") {
+                showStatus(
+                  "Please enter a valid folder name",
+                  "error",
+                  "folderRenameStatusMessage"
+                );
+                return;
+              }
+
+              // Check for duplicate folder name
+              if (
+                allFolders.some((f) => f.name === newName && f.name !== oldName)
+              ) {
+                showStatus(
+                  "A folder with this name already exists",
+                  "error",
+                  "folderRenameStatusMessage"
+                );
+                return;
+              }
+
+              // Show loader
+              showLoader(`Renaming folder "${oldName}" to "${newName}"...`);
+
+              // Call API to rename folder
+              fetch(
+                `/rename-file?fileId=${folderId}&newName=${encodeURIComponent(
+                  newName
+                )}`,
+                {
+                  method: "POST",
+                }
+              )
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.success) {
+                    showStatus(
+                      "Folder renamed successfully",
+                      "success",
+                      "folderRenameStatusMessage"
+                    );
+
+                    // Reload folders
+                    loadFolders();
+
+                    // Update current folder if it was renamed
+                    if (currentFolder === oldName) {
+                      currentFolder = newName;
+                      loadFiles();
+                    }
+
+                    // Close modal after a delay
+                    setTimeout(() => {
+                      folderRenameModal.style.display = "none";
+                    }, 1500);
+                  } else {
+                    showStatus(
+                      "Failed to rename folder: " + data.error,
+                      "error",
+                      "folderRenameStatusMessage"
+                    );
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error renaming folder:", error);
+                  showStatus(
+                    "Error renaming folder. Please try again.",
+                    "error",
+                    "folderRenameStatusMessage"
+                  );
+                })
+                .finally(() => {
+                  hideLoader();
+                });
+            });
+
+          document
+            .getElementById("cancelFolderRename")
+            .addEventListener("click", () => {
+              folderRenameModal.style.display = "none";
+            });
+
+          // Setup context menu event handlers
+          setupContextMenuHandlers();
+
+          // Setup sidebar tab event listeners
+          document
+            .getElementById("homeTab")
+            .addEventListener("click", function (e) {
+              e.preventDefault();
+              setActiveTab("home");
+              loadFiles();
+            });
+
+          document
+            .getElementById("recentTab")
+            .addEventListener("click", function (e) {
+              e.preventDefault();
+              setActiveTab("recent");
+              loadRecentFiles();
+            });
+
+          document
+            .getElementById("starredTab")
+            .addEventListener("click", function (e) {
+              e.preventDefault();
+              setActiveTab("starred");
+              loadStarredFiles();
+            });
+
+          document
+            .getElementById("trashTab")
+            .addEventListener("click", function (e) {
+              e.preventDefault();
+              setActiveTab("trash");
+              loadTrashedFiles();
+            });
+
+          // Function to set active tab
+          function setActiveTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll(".sidebar ul li a").forEach((a) => {
+              a.classList.remove("active");
+            });
+            document.getElementById(`${tab}Tab`).classList.add("active");
+          }
+
+          // Setup folder context menu handlers
+          document
+            .getElementById("folderColor")
+            .addEventListener("click", function (e) {
+              e.stopPropagation();
+              const colorSelector = folderContextMenu.querySelector(
+                ".folder-color-selector"
+              );
+              if (colorSelector) {
+                colorSelector.style.display =
+                  colorSelector.style.display === "none" ? "flex" : "none";
+              }
+            });
+
+          // Folder color options
+          document
+            .querySelectorAll(".folder-color-selector .color-option")
+            .forEach((option) => {
+              option.addEventListener("click", function (e) {
+                e.stopPropagation();
+                const folderId = folderContextMenu.dataset.folderId;
+                const folderName = folderContextMenu.dataset.folderName;
+                const color = this.dataset.color;
+
+                // Call API to update folder color
+                showLoader(`Updating folder color...`);
+                fetch(
+                  `/update-folder-color?folderId=${folderId}&color=${encodeURIComponent(
+                    color
+                  )}`,
+                  { method: "POST" }
+                )
+                  .then((response) => response.json())
+                  .then((data) => {
+                    if (data.success) {
+                      // Refresh folders to show updated color
+                      loadFolders();
+                    } else {
+                      alert("Failed to update folder color: " + data.error);
+                    }
+                  })
+                  .catch((error) => {
+                    console.error("Error updating folder color:", error);
+                    alert("Error updating folder color. Please try again.");
+                  })
+                  .finally(() => {
+                    hideLoader();
+                    folderContextMenu.style.display = "none";
+                  });
+              });
+            });
+        }
+
+        function setupContextMenuHandlers() {
+          // Context menu actions
+          document
+            .getElementById("contextPreview")
+            .addEventListener("click", function () {
+              const fileId = fileContextMenu.dataset.fileId;
+              const fileLink = fileContextMenu.dataset.fileLink;
+              const fileName = fileContextMenu.dataset.fileName;
+              const fileMime = fileContextMenu.dataset.fileMime;
+
+              openFilePreview(fileId, fileLink, fileName, fileMime);
+              fileContextMenu.style.display = "none";
+            });
+
+          document
+            .getElementById("contextRename")
+            .addEventListener("click", function () {
+              const fileId = fileContextMenu.dataset.fileId;
+              const fileName = fileContextMenu.dataset.fileName;
+
+              // Set values in rename modal
+              document.getElementById("renameFileId").value = fileId;
+              document.getElementById("newFileName").value = fileName;
+
+              // Show rename modal
+              renameModal.style.display = "block";
+              fileContextMenu.style.display = "none";
+
+              // Focus on input
+              document.getElementById("newFileName").focus();
+            });
+
+          document
+            .getElementById("contextShare")
+            .addEventListener("click", function () {
+              const fileId = fileContextMenu.dataset.fileId;
+              const fileName = fileContextMenu.dataset.fileName;
+              const fileLink = fileContextMenu.dataset.fileLink;
+
+              // Set file info in share modal
+              document.getElementById("shareFileId").value = fileId;
+              document.getElementById("shareFileName").value = fileName;
+              document.getElementById("shareLinkInput").value = fileLink || "";
+
+              // Clear previous inputs
+              document.getElementById("shareEmail").value = "";
+              document.getElementById("shareRole").value = "reader";
+
+              // Show first tab content
+              document.querySelectorAll(".share-tab").forEach((tab) => {
+                tab.classList.remove("active");
+              });
+              document.querySelectorAll(".share-content").forEach((content) => {
+                content.style.display = "none";
+              });
+              document
+                .querySelector("[data-tab='email']")
+                .classList.add("active");
+              document.getElementById("emailShare").style.display = "block";
+
+              // Show share modal
+              shareFileModal.style.display = "block";
+              fileContextMenu.style.display = "none";
+            });
+
+          document
+            .getElementById("contextMove")
+            .addEventListener("click", function () {
+              const fileId = fileContextMenu.dataset.fileId;
+
+              // Set file ID in move modal
+              document.getElementById("moveFileId").value = fileId;
+
+              // Populate folders in the select dropdown
+              fetch("/list-drive-folders")
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.success) {
+                    targetFolderSelect.innerHTML = "";
+                    data.folders.forEach((folder) => {
+                      const option = document.createElement("option");
+                      option.value = folder.name;
+                      option.textContent = folder.name;
+                      targetFolderSelect.appendChild(option);
+                    });
+
+                    // Show move modal
+                    moveFileModal.style.display = "block";
+                    fileContextMenu.style.display = "none";
+                  }
+                });
+            });
+
+          document
+            .getElementById("contextDelete")
+            .addEventListener("click", function () {
+              const fileId = fileContextMenu.dataset.fileId;
+              const fileName = fileContextMenu.dataset.fileName;
+
+              // Confirm deletion
+              if (confirm(`Move "${fileName}" to trash?`)) {
+                // Call API to move file to trash or delete
+                fetch(`/trash-file?fileId=${fileId}`, {
+                  method: "POST",
+                })
+                  .then((response) => response.json())
+                  .then((data) => {
+                    if (data.success) {
+                      // Reload files after successful trash move
+                      loadFiles();
+                    } else {
+                      alert("Failed to move file to trash: " + data.error);
+                    }
+                  })
+                  .catch((error) => {
+                    console.error("Error moving file to trash:", error);
+                    alert("Error moving file to trash. Please try again.");
+                  });
+              }
+
+              fileContextMenu.style.display = "none";
+            });
+
+          document
+            .getElementById("contextDetails")
+            .addEventListener("click", function () {
+              const fileId = fileContextMenu.dataset.fileId;
+
+              // Show loading in details modal
+              document.getElementById("fileDetailsContent").innerHTML = `
+              <div style="text-align: center; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                <l-miyagi size="35" stroke="3.5" speed="0.9" color="black"></l-miyagi>
+                <p>Loading file details...</p>
+              </div>
+            `;
+
+              // Fetch file details
+              fetch(`/file-details?fileId=${fileId}`)
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.success) {
+                    displayFileDetails(data.fileDetails);
+                  } else {
+                    document.getElementById("fileDetailsContent").innerHTML = `
+                    <div class="error" style="padding: 15px;">
+                      Failed to load file details: ${data.error}
+                    </div>
+                  `;
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error getting file details:", error);
+                  document.getElementById("fileDetailsContent").innerHTML = `
+                  <div class="error" style="padding: 15px;">
+                    Error loading file details. Please try again.
+                  </div>
+                `;
+                });
+
+              // Show details modal
+              fileDetailsModal.style.display = "block";
+              fileContextMenu.style.display = "none";
+            });
+
+          // Color label options
+          document.querySelectorAll(".color-option").forEach((option) => {
+            option.addEventListener("click", function (e) {
+              e.stopPropagation();
+              const fileId = fileContextMenu.dataset.fileId;
+              const color = this.dataset.color;
+
+              // Call API to update color label
+              fetch(
+                `/update-file-color?fileId=${fileId}&color=${encodeURIComponent(
+                  color
+                )}`,
+                {
+                  method: "POST",
+                }
+              )
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.success) {
+                    // Refresh files to show updated color
+                    loadFiles();
+                  } else {
+                    alert("Failed to update color: " + data.error);
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error updating color:", error);
+                  alert("Error updating color. Please try again.");
+                });
+
+              fileContextMenu.style.display = "none";
+            });
+          });
+
+          // Modal action buttons
+          document
+            .getElementById("submitRename")
+            .addEventListener("click", function () {
+              const fileId = document.getElementById("renameFileId").value;
+              const newName = document.getElementById("newFileName").value;
+
+              if (!newName || newName.trim() === "") {
+                showStatus(
+                  "Please enter a valid file name",
+                  "error",
+                  "renameStatusMessage"
+                );
+                return;
+              }
+
+              // Call API to rename file
+              fetch(
+                `/rename-file?fileId=${fileId}&newName=${encodeURIComponent(
+                  newName
+                )}`,
+                {
+                  method: "POST",
+                }
+              )
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.success) {
+                    showStatus(
+                      "File renamed successfully",
+                      "success",
+                      "renameStatusMessage"
+                    );
+                    // Reload files after successful rename
+                    loadFiles();
+
+                    // Close modal after a delay
+                    setTimeout(() => {
+                      renameModal.style.display = "none";
+                    }, 1500);
+                  } else {
+                    showStatus(
+                      "Failed to rename file: " + data.error,
+                      "error",
+                      "renameStatusMessage"
+                    );
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error renaming file:", error);
+                  showStatus(
+                    "Error renaming file. Please try again.",
+                    "error",
+                    "renameStatusMessage"
+                  );
+                });
+            });
+
+          document
+            .getElementById("submitMove")
+            .addEventListener("click", function () {
+              const fileId = document.getElementById("moveFileId").value;
+              const targetFolder =
+                document.getElementById("targetFolderSelect").value;
+
+              // Call API to move file
+              fetch(
+                `/move-file?fileId=${fileId}&targetFolder=${encodeURIComponent(
+                  targetFolder
+                )}`,
+                {
+                  method: "POST",
+                }
+              )
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.success) {
+                    showStatus(
+                      "File moved successfully",
+                      "success",
+                      "moveStatusMessage"
+                    );
+                    // Reload files after successful move
+                    loadFiles();
+
+                    // Close modal after a delay
+                    setTimeout(() => {
+                      moveFileModal.style.display = "none";
+                    }, 1500);
+                  } else {
+                    showStatus(
+                      "Failed to move file: " + data.error,
+                      "error",
+                      "moveStatusMessage"
+                    );
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error moving file:", error);
+                  showStatus(
+                    "Error moving file. Please try again.",
+                    "error",
+                    "moveStatusMessage"
+                  );
+                });
+            });
+
+          document
+            .getElementById("submitEmailShare")
+            .addEventListener("click", function () {
+              const fileId = document.getElementById("shareFileId").value;
+              const email = document.getElementById("shareEmail").value;
+              const role = document.getElementById("shareRole").value;
+
+              if (!email || !email.includes("@")) {
+                showStatus(
+                  "Please enter a valid email address",
+                  "error",
+                  "shareStatusMessage"
+                );
+                return;
+              }
+
+              showLoader("Sharing file...");
+
+              // Call API to share file
+              fetch(
+                `/share-file?fileId=${fileId}&email=${encodeURIComponent(
+                  email
+                )}&role=${role}`,
+                {
+                  method: "POST",
+                }
+              )
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.success) {
+                    showStatus(
+                      "File shared successfully",
+                      "success",
+                      "shareStatusMessage"
+                    );
+
+                    // Clear input
+                    document.getElementById("shareEmail").value = "";
+                  } else {
+                    showStatus(
+                      "Failed to share file: " + data.error,
+                      "error",
+                      "shareStatusMessage"
+                    );
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error sharing file:", error);
+                  showStatus(
+                    "Error sharing file. Please try again.",
+                    "error",
+                    "shareStatusMessage"
+                  );
+                })
+                .finally(() => {
+                  hideLoader();
+                });
+            });
+
+          // Add favorite handler
+          document
+            .getElementById("contextFavorite")
+            .addEventListener("click", function () {
+              const fileId = fileContextMenu.dataset.fileId;
+              const fileName = fileContextMenu.dataset.fileName;
+
+              showLoader(`Adding "${fileName}" to favorites...`);
+
+              // Call API to add star/favorite property to file
+              fetch(
+                `/update-file-properties?fileId=${fileId}&property=starred&value=true`,
+                {
+                  method: "POST",
+                }
+              )
+                .then((response) => response.json())
+                .then((data) => {
+                  if (data.success) {
+                    // Reload files to show updated state
+                    loadFiles();
+                    alert(`"${fileName}" added to favorites!`);
+                  } else {
+                    alert("Failed to add to favorites: " + data.error);
+                  }
+                })
+                .catch((error) => {
+                  console.error("Error adding to favorites:", error);
+                  alert("Error adding to favorites. Please try again.");
+                })
+                .finally(() => {
+                  hideLoader();
+                  fileContextMenu.style.display = "none";
+                });
+            });
+        }
+
+        function createNewFolder() {
+          const folderName = document.getElementById("folderName").value;
+
+          if (!folderName || folderName.trim() === "") {
+            showStatus(
+              "Please enter a valid folder name",
+              "error",
+              "folderStatusMessage"
+            );
+            return;
+          }
+
+          // Call API to create folder
+          fetch(`/create-folder?folderName=${encodeURIComponent(folderName)}`, {
+            method: "POST",
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                showStatus(
+                  "Folder created successfully",
+                  "success",
+                  "folderStatusMessage"
+                );
+                // Reload folders
+                loadFolders();
+
+                // Close modal after a delay
+                setTimeout(() => {
+                  createFolderModal.style.display = "none";
+                  document.getElementById("folderName").value = "";
+                }, 1500);
+              } else {
+                showStatus(
+                  "Failed to create folder: " + data.error,
+                  "error",
+                  "folderStatusMessage"
+                );
+              }
+            })
+            .catch((error) => {
+              console.error("Error creating folder:", error);
+              showStatus(
+                "Error creating folder. Please try again.",
+                "error",
+                "folderStatusMessage"
+              );
+            });
+        }
+
+        function displayFileDetails(details) {
+          // Format created and modified dates
+          const created = new Date(details.createdTime).toLocaleString();
+          const modified = details.modifiedTime
+            ? new Date(details.modifiedTime).toLocaleString()
+            : created;
+
+          // Format size
+          const size = formatFileSize(parseInt(details.size || "0"));
+
+          // Build HTML for details
+          let html = `
+            <div class="file-details-row">
+              <h4>Name</h4>
+              <p>${details.name}</p>
+            </div>
+            <div class="file-details-row">
+              <h4>Type</h4>
+              <p>${details.mimeType}</p>
+            </div>
+            <div class="file-details-row">
+              <h4>Size</h4>
+              <p>${size}</p>
+            </div>
+            <div class="file-details-row">
+              <h4>Location</h4>
+              <p>${details.location || "My Drive"}</p>
+            </div>
+            <div class="file-details-row">
+              <h4>Owner</h4>
+              <p>${details.owner || "You"}</p>
+            </div>
+            <div class="file-details-row">
+              <h4>Created</h4>
+              <p>${created}</p>
+            </div>
+            <div class="file-details-row">
+              <h4>Modified</h4>
+              <p>${modified}</p>
+            </div>
+          `;
+
+          // Add web view link if available
+          if (details.webViewLink) {
+            html += `
+              <div class="file-details-row">
+                <h4>Web Link</h4>
+                <p><a href="${details.webViewLink}" target="_blank">${details.webViewLink}</a></p>
+              </div>
+            `;
+          }
+
+          document.getElementById("fileDetailsContent").innerHTML = html;
+        }
+
+        function handleSearchInput() {
+          const clearSearchBtn = document.getElementById("clearSearch");
+          if (this.value.length > 0) {
+            clearSearchBtn.style.display = "block";
+          } else {
+            clearSearchBtn.style.display = "none";
+          }
+
+          filterFiles();
+          // Show feedback about search results
+          const searchTerm = this.value.toLowerCase();
+          if (searchTerm.length > 0) {
+            const filteredCount = document.querySelectorAll(
+              ".file-card, .file-list tbody tr"
+            ).length;
+            if (filteredCount === 0) {
+              filesContainer.innerHTML = `
+              <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <p>No files found matching "${searchTerm}"</p>
+                <button class="btn btn-secondary" id="clearSearchBtn">
+                  <i class="fas fa-times"></i> Clear Search
+                </button>
+              </div>
+            `;
+              document
+                .getElementById("clearSearchBtn")
+                ?.addEventListener("click", () => {
+                  searchInput.value = "";
+                  filterFiles();
+                  clearSearchBtn.style.display = "none";
+                });
+            }
+          }
+        }
+
+        function updateFilePreview() {
+          filePreviewArea.innerHTML = "";
+
+          if (fileInput.files.length > 0) {
+            for (const file of fileInput.files) {
+              const preview = document.createElement("div");
+              preview.className = "file-preview";
+              preview.innerHTML = `<i class="fas fa-file"></i> ${file.name}`;
+              filePreviewArea.appendChild(preview);
+            }
+          }
+        }
+
+        function uploadFiles() {
+          const files = fileInput.files;
+          if (files.length === 0) {
+            showStatus("Please select files to upload", "error");
+            return;
+          }
+
+          const folder = folderSelect.value;
+          const formData = new FormData();
+
+          for (const file of files) {
+            formData.append("files", file);
+          }
+
+          formData.append("folderName", folder);
+
+          // Show both global loader and the upload loading indicator
+          showLoader("Uploading files to Google Drive...");
+          document.getElementById("uploadLoading").style.display = "block";
+          document.getElementById("statusMessage").style.display = "none";
+
+          fetch("/upload-to-drive", {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                showStatus(data.message, "success");
+                fileInput.value = "";
+                filePreviewArea.innerHTML = "";
+
+                // Reload files after successful upload
+                loadFiles();
+
+                // Close modal after a delay
+                setTimeout(() => {
+                  uploadModal.style.display = "none";
+                }, 2000);
+              } else {
+                showStatus(data.error, "error");
+              }
+            })
+            .catch((error) => {
+              console.error("Error uploading files:", error);
+              showStatus("Error uploading files. Please try again.", "error");
+            })
+            .finally(() => {
+              document.getElementById("uploadLoading").style.display = "none";
+              hideLoader();
+            });
+        }
+
+        // Functions for loading indicators
+        function showLoader(message = "Processing...") {
+          loaderMessage.textContent = message;
+          globalLoader.style.display = "flex";
+        }
+
+        function hideLoader() {
+          globalLoader.style.display = "none";
+        }
+
+        // Functions
+        function loadFolders() {
+          showLoader("Loading folders...");
+
+          fetch("/list-drive-folders")
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                allFolders = data.folders;
+                folderSelect.innerHTML = ""; // Clear dropdown
+                foldersList.innerHTML = ""; // Clear sidebar list
+
+                data.folders.forEach((folder) => {
+                  // Add to dropdown
+                  const option = document.createElement("option");
+                  option.value = folder.name;
+                  option.textContent = folder.name;
+                  folderSelect.appendChild(option);
+
+                  // Add to sidebar
+                  const folderItem = document.createElement("div");
+                  folderItem.className = `folder-item ${
+                    folder.name === currentFolder ? "active" : ""
+                  }`;
+                  folderItem.dataset.folder = folder.name;
+                  folderItem.dataset.id = folder.id;
+
+                  // Add folder with a context menu trigger
+                  folderItem.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                      <div style="display: flex; align-items: center;">
+                        <i class="fas fa-folder" ${
+                          folder.properties && folder.properties.colorLabel
+                            ? `style="color: ${folder.properties.colorLabel}"`
+                            : ""
+                        }></i> 
+                        <span style="margin-left: 8px;">${folder.name}</span>
+                      </div>
+                      <div class="folder-actions">
+                        <button class="file-actions-btn folder-menu-btn" style="opacity: 0.4" onclick="event.stopPropagation();">
+                          <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                      </div>
+                    </div>
+                  `;
+
+                  // Add click event to navigate to folder
+                  folderItem.addEventListener("click", () => {
+                    document
+                      .querySelectorAll(".folder-item")
+                      .forEach((item) => {
+                        item.classList.remove("active");
+                      });
+                    folderItem.classList.add("active");
+                    currentFolder = folder.name;
+                    loadFiles();
+                  });
+
+                  foldersList.appendChild(folderItem);
+
+                  // Add context menu trigger for folder options
+                  const menuBtn = folderItem.querySelector(".folder-menu-btn");
+                  if (menuBtn) {
+                    menuBtn.addEventListener("click", (event) => {
+                      event.stopPropagation();
+                      showFolderContextMenu(event, folder.id, folder.name);
+                    });
+                  }
+                });
+              } else {
+                console.error("Failed to load folders:", data.error);
+              }
+            })
+            .catch((error) => console.error("Error loading folders:", error))
+            .finally(() => {
+              hideLoader();
+            });
+        }
+
+        function loadFiles() {
+          showLoader("Loading files...");
+
+          fetch(
+            `/list-drive-files?folderName=${encodeURIComponent(currentFolder)}`
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                allFiles = data.files;
+                filterFiles();
+              } else {
+                console.error("Failed to load files:", data.error);
+                filesContainer.innerHTML = `
+                <div class="empty-state">
+                  <i class="fas fa-exclamation-circle"></i>
+                  <p>Failed to load files: ${data.error}</p>
+                </div>
+              `;
+              }
+            })
+            .catch((error) => {
+              console.error("Error loading files:", error);
+              filesContainer.innerHTML = `
+              <div class="empty-state">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>Error loading files</p>
+              </div>
+            `;
+            })
+            .finally(() => {
+              hideLoader();
+            });
+        }
+
+        // Show folder context menu
+        function showFolderContextMenu(event, folderId, folderName) {
+          folderContextMenu.dataset.folderId = folderId;
+          folderContextMenu.dataset.folderName = folderName;
+
+          folderContextMenu.style.left = `${event.pageX}px`;
+          folderContextMenu.style.top = `${event.pageY}px`;
+          folderContextMenu.style.display = "block";
+
+          // Close when clicking outside
+          document.addEventListener("click", closeFolderContextMenu);
+
+          // Prevent the default context menu
+          event.preventDefault();
+        }
+
+        function closeFolderContextMenu(event) {
+          if (!event.target.closest("#folderContextMenu")) {
+            folderContextMenu.style.display = "none";
+            document.removeEventListener("click", closeFolderContextMenu);
+          }
+        }
+
+        function filterFiles() {
+          const searchTerm = searchInput.value.toLowerCase();
+          let filteredFiles = allFiles;
+
+          // Apply search filter
+          if (searchTerm) {
+            filteredFiles = filteredFiles.filter((file) => {
+              // Search in file name
+              const nameMatch = file.name.toLowerCase().includes(searchTerm);
+
+              // Search in file type/extension
+              const fileExtension = file.name.split(".").pop().toLowerCase();
+              const typeMatch = fileExtension.includes(searchTerm);
+
+              // Search in mime type (simplified for user readability)
+              let simplifiedType = "";
+              if (file.mimeType.includes("image")) simplifiedType = "image";
+              else if (file.mimeType.includes("video"))
+                simplifiedType = "video";
+              else if (file.mimeType.includes("audio"))
+                simplifiedType = "audio";
+              else if (file.mimeType.includes("pdf")) simplifiedType = "pdf";
+              else if (file.mimeType.includes("document"))
+                simplifiedType = "document";
+              else if (file.mimeType.includes("spreadsheet"))
+                simplifiedType = "spreadsheet";
+              else if (file.mimeType.includes("presentation"))
+                simplifiedType = "presentation";
+
+              const mimeMatch = simplifiedType.includes(searchTerm);
+
+              return nameMatch || typeMatch || mimeMatch;
+            });
+          }
+
+          // Apply type filter
+          if (currentFilter !== "all") {
+            filteredFiles = filteredFiles.filter((file) => {
+              if (currentFilter === "documents") {
+                return (
+                  file.mimeType.includes("document") ||
+                  file.mimeType.includes("pdf") ||
+                  file.mimeType.includes("text")
+                );
+              } else if (currentFilter === "images") {
+                return file.mimeType.includes("image");
+              } else if (currentFilter === "videos") {
+                return file.mimeType.includes("video");
+              }
+              return true;
+            });
+          }
+
+          displayFiles(filteredFiles);
+        }
+
+        function displayFiles(files) {
+          if (files.length === 0) {
+            filesContainer.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-folder-open"></i>
+              <p>No files found in this folder</p>
+              <button class="upload-btn" id="emptyStateUploadBtn">
+                <i class="fas fa-cloud-upload-alt"></i> Upload Files
+              </button>
+            </div>
+          `;
+            document
+              .getElementById("emptyStateUploadBtn")
+              .addEventListener("click", () => {
+                uploadModal.style.display = "block";
+              });
+            return;
+          }
+
+          updateView(files);
+        }
+
+        function updateView(files = null) {
+          if (!files) {
+            filterFiles();
+            return;
+          }
+
+          if (currentView === "grid") {
+            displayGridView(files);
+          } else {
+            displayListView(files);
+          }
+        }
+
+        function displayGridView(files) {
+          filesContainer.className = "file-grid";
+          let html = "";
+
+          files.forEach((file) => {
+            const fileIcon = getFileIcon(file.mimeType);
+            const colorStyle = file.colorLabel
+              ? `background-color: ${file.colorLabel}`
+              : "";
+
+            html += `
+            <div class="file-card" data-id="${file.id}" data-link="${
+              file.webViewLink
+            }" data-mime="${file.mimeType}" data-name="${file.name}">
+              <div class="file-color-indicator" style="${colorStyle}"></div>
+                            ${
+                              file.colorLabel
+                                ? `<div class="file-bookmark" style="background-color: ${file.colorLabel}"></div>`
+                                : ""
+                            }              ${
+              file.properties && file.properties.starred === "true"
+                ? `<div class="bookmark-label"><i class="fas fa-star"></i></div>`
+                : ""
+            }
+              <div class="file-actions">
+                <button class="file-actions-btn download-btn" title="Download" onclick="event.stopPropagation();">
+                  <i class="fas fa-download"></i>
+                </button>
+                <button class="file-actions-btn menu-btn" title="More Options" onclick="event.stopPropagation();">
+                  <i class="fas fa-ellipsis-v"></i>
+                </button>
+              </div>
+              <div class="file-thumbnail">
+                <i class="${fileIcon}"></i>
+              </div>
+              <div class="file-info">
+                <div class="file-name" title="${file.name}">${file.name}</div>
+                <div class="file-meta">${file.formattedSize} • ${
+              file.formattedDate
+            }</div>
+              </div>
+            </div>
+          `;
+          });
+
+          filesContainer.innerHTML = html;
+
+          // Add event listeners to file cards
+          document.querySelectorAll(".file-card").forEach((card) => {
+            card.addEventListener("click", () =>
+              openFilePreview(
+                card.dataset.id,
+                card.dataset.link,
+                card.querySelector(".file-name").textContent,
+                card.dataset.mime
+              )
+            );
+
+            // Add context menu functionality to action buttons
+            const actionBtn = card.querySelector(".menu-btn");
+            if (actionBtn) {
+              actionBtn.addEventListener("click", (event) => {
+                event.stopPropagation();
+                showContextMenu(
+                  event,
+                  card.dataset.id,
+                  card.dataset.name,
+                  card.dataset.mime,
+                  card.dataset.link
+                );
+              });
+            }
+
+            // Add download functionality
+            const downloadBtn = card.querySelector(".download-btn");
+            if (downloadBtn) {
+              downloadBtn.addEventListener("click", (event) => {
+                event.stopPropagation();
+                downloadFile(card.dataset.id, card.dataset.name);
+              });
+            }
+          });
+        }
+
+        function displayListView(files) {
+          filesContainer.className = "";
+
+          let html = `
+          <table class="file-list">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Modified</th>
+                <th>Size</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+          files.forEach((file) => {
+            const fileIcon = getFileIcon(file.mimeType);
+            const colorStyle = file.colorLabel
+              ? `border-left: 4px solid ${file.colorLabel}`
+              : "";
+
+            html += `
+            <tr data-id="${file.id}" data-link="${
+              file.webViewLink
+            }" data-mime="${file.mimeType}" data-name="${
+              file.name
+            }" style="${colorStyle}">
+              <td>
+                                ${
+                                  file.colorLabel
+                                    ? `<div class="file-bookmark list-bookmark" style="background-color: ${file.colorLabel}; position: relative; display: inline-block; width: 10px; height: 20px; margin-right: 5px; clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 85%, 0 100%);"></div>`
+                                    : ""
+                                }                ${
+              file.properties && file.properties.starred === "true"
+                ? `<div class="bookmark-label list-view"><i class="fas fa-star"></i></div>`
+                : ""
+            }
+                <div class="file-icon">
+                  <i class="${fileIcon}"></i>
+                  <span title="${file.name}">${file.name}</span>
+                </div>
+              </td>
+              <td>${file.formattedDate}</td>
+              <td>${file.formattedSize}</td>
+              <td style="display: flex; gap: 5px;">
+                <button class="file-actions-btn download-btn" title="Download" onclick="event.stopPropagation();">
+                  <i class="fas fa-download"></i>
+                </button>
+                <button class="file-actions-btn menu-btn" title="More Options" onclick="event.stopPropagation();">
+                  <i class="fas fa-ellipsis-v"></i>
+                </button>
+              </td>
+            </tr>
+          `;
+          });
+
+          html += `
+            </tbody>
+          </table>
+        `;
+
+          filesContainer.innerHTML = html;
+
+          // Add event listeners to table rows
+          document.querySelectorAll(".file-list tbody tr").forEach((row) => {
+            row.addEventListener("click", () =>
+              openFilePreview(
+                row.dataset.id,
+                row.dataset.link,
+                row.querySelector(".file-icon span").textContent,
+                row.dataset.mime
+              )
+            );
+
+            // Add context menu functionality to action buttons
+            const actionBtn = row.querySelector(".menu-btn");
+            if (actionBtn) {
+              actionBtn.addEventListener("click", (event) => {
+                event.stopPropagation();
+                showContextMenu(
+                  event,
+                  row.dataset.id,
+                  row.dataset.name,
+                  row.dataset.mime,
+                  row.dataset.link
+                );
+              });
+            }
+
+            // Add download functionality
+            const downloadBtn = row.querySelector(".download-btn");
+            if (downloadBtn) {
+              downloadBtn.addEventListener("click", (event) => {
+                event.stopPropagation();
+                downloadFile(row.dataset.id, row.dataset.name);
+              });
+            }
+          });
+        }
+
+        function getFileIcon(mimeType) {
+          if (mimeType.includes("image")) {
+            return "fas fa-image img-icon";
+          } else if (mimeType.includes("pdf")) {
+            return "fas fa-file-pdf pdf-icon";
+          } else if (
+            mimeType.includes("document") ||
+            mimeType.includes("text")
+          ) {
+            return "fas fa-file-alt doc-icon";
+          } else if (mimeType.includes("video")) {
+            return "fas fa-file-video video-icon";
+          } else if (mimeType.includes("audio")) {
+            return "fas fa-file-audio audio-icon";
+          } else {
+            return "fas fa-file other-icon";
+          }
+        }
+
+        function showContextMenu(event, fileId, fileName, fileMime, fileLink) {
+          const contextMenu = document.getElementById("fileContextMenu");
+
+          // Position the menu
+          contextMenu.style.left = `${event.pageX}px`;
+          contextMenu.style.top = `${event.pageY}px`;
+
+          // Show it
+          contextMenu.style.display = "block";
+
+          // Store the file info on the context menu for actions
+          contextMenu.dataset.fileId = fileId;
+          contextMenu.dataset.fileName = fileName;
+          contextMenu.dataset.fileMime = fileMime;
+          contextMenu.dataset.fileLink = fileLink;
+
+          // Hide color selector initially
+          const colorSelector = contextMenu.querySelector(".color-selector");
+          if (colorSelector) {
+            colorSelector.style.display = "none";
+          }
+
+          // Prevent default context menu
+          event.preventDefault();
+
+          // Close menu when clicking outside
+          document.addEventListener("click", closeContextMenu);
+        }
+
+        function closeContextMenu(event) {
+          const contextMenu = document.getElementById("fileContextMenu");
+          const colorSelector = contextMenu.querySelector(".color-selector");
+
+          // Don't close if clicking on color options
+          if (event.target.closest(".color-selector")) {
+            return;
+          }
+
+          // Don't close if clicking on color label menu item (toggles display)
+          if (event.target.closest("#contextColorLabel")) {
+            // Toggle color selector
+            if (colorSelector) {
+              colorSelector.style.display =
+                colorSelector.style.display === "none" ? "flex" : "none";
+            }
+            return;
+          }
+
+          // Close the menu
+          contextMenu.style.display = "none";
+
+          // Remove event listener
+          document.removeEventListener("click", closeContextMenu);
+        }
+
+        function openFilePreview(fileId, driveLink, fileName, mimeType) {
+          const previewFileName = document.getElementById("previewFileName");
+          const previewIframe = document.getElementById("previewIframe");
+          const previewImage = document.getElementById("previewImage");
+          const previewVideo = document.getElementById("previewVideo");
+          const previewLoading = document.getElementById("previewLoading");
+          const unsupportedPreview =
+            document.getElementById("unsupportedPreview");
+          const openInDrive = document.getElementById("openInDrive");
+          const downloadFile = document.getElementById("downloadFile");
+          const directDownloadLink =
+            document.getElementById("directDownloadLink");
+
+          // Set file name
+          previewFileName.textContent = fileName;
+
+          // Set drive link
+          openInDrive.onclick = () => window.open(driveLink, "_blank");
+
+          // Set download link
+          const fileUrl = `/file/${fileId}`;
+          downloadFile.onclick = () => {
+            showLoader("Downloading file...");
+            const a = document.createElement("a");
+            a.href = fileUrl;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => {
+              hideLoader();
+            }, 1000);
+          };
+
+          directDownloadLink.href = fileUrl;
+          directDownloadLink.download = fileName;
+
+          // Hide all preview elements first
+          previewIframe.style.display = "none";
+          previewImage.style.display = "none";
+          previewVideo.style.display = "none";
+          unsupportedPreview.style.display = "none";
+
+          // Show loading indicator
+          previewLoading.style.display = "block";
+
+          // Show modal first
+          filePreviewModal.style.display = "block";
+
+          // Show appropriate preview based on file type
+          if (mimeType.includes("image")) {
+            previewImage.onload = () => {
+              previewLoading.style.display = "none";
+              previewImage.style.display = "block";
+            };
+            previewImage.onerror = () => {
+              previewLoading.style.display = "none";
+              unsupportedPreview.style.display = "block";
+            };
+            previewImage.src = fileUrl;
+          } else if (mimeType.includes("video")) {
+            previewVideo.oncanplay = () => {
+              previewLoading.style.display = "none";
+              previewVideo.style.display = "block";
+            };
+            previewVideo.onerror = () => {
+              previewLoading.style.display = "none";
+              unsupportedPreview.style.display = "block";
+            };
+            previewVideo.src = fileUrl;
+          } else if (
+            mimeType.includes("pdf") ||
+            mimeType.includes("text") ||
+            mimeType.includes("document")
+          ) {
+            previewIframe.onload = () => {
+              previewLoading.style.display = "none";
+              previewIframe.style.display = "block";
+            };
+            previewIframe.onerror = () => {
+              previewLoading.style.display = "none";
+              unsupportedPreview.style.display = "block";
+            };
+            previewIframe.src = fileUrl;
+          } else {
+            previewLoading.style.display = "none";
+            unsupportedPreview.style.display = "block";
+          }
+        }
+
+        // Helper function to show status messages in different modals
+        function showStatus(message, type, elementId) {
+          const statusDiv = document.getElementById(
+            elementId || "statusMessage"
+          );
+          statusDiv.textContent = message;
+          statusDiv.className = `status-message ${type}`;
+          statusDiv.style.display = "block";
+        }
+
+        // Helper function for downloading files
+        function downloadFile(fileId, fileName) {
+          showLoader(`Downloading ${fileName}...`);
+          const fileUrl = `/file/${fileId}`;
+
+          const a = document.createElement("a");
+          a.href = fileUrl;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+
+          setTimeout(() => {
+            hideLoader();
+          }, 1000);
+        }
+
+        // Add functions to load different types of files
+        function loadRecentFiles() {
+          showLoader("Loading recent files...");
+
+          fetch("/list-recent-files")
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                allFiles = data.files;
+                displayFiles(allFiles);
+                document.querySelector(".content-header h2").textContent =
+                  "Recent Files";
+              } else {
+                console.error("Failed to load recent files:", data.error);
+                filesContainer.innerHTML = `
+                  <div class="empty-state">
+                    <i class="fas fa-clock"></i>
+                    <p>No recent files found</p>
+                  </div>
+                `;
+              }
+            })
+            .catch((error) => {
+              console.error("Error loading recent files:", error);
+              filesContainer.innerHTML = `
+                <div class="empty-state">
+                  <i class="fas fa-exclamation-circle"></i>
+                  <p>Error loading recent files</p>
+                </div>
+              `;
+            })
+            .finally(() => {
+              hideLoader();
+            });
+        }
+
+        function loadStarredFiles() {
+          showLoader("Loading starred files...");
+
+          fetch("/list-drive-files?property=starred&value=true")
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                allFiles = data.files;
+                displayFiles(allFiles);
+                document.querySelector(".content-header h2").textContent =
+                  "Starred Files";
+              } else {
+                console.error("Failed to load starred files:", data.error);
+                filesContainer.innerHTML = `
+                  <div class="empty-state">
+                    <i class="fas fa-star"></i>
+                    <p>No starred files found</p>
+                    <p class="subtitle">Add files to favorites to see them here</p>
+                  </div>
+                `;
+              }
+            })
+            .catch((error) => {
+              console.error("Error loading starred files:", error);
+              filesContainer.innerHTML = `
+                <div class="empty-state">
+                  <i class="fas fa-exclamation-circle"></i>
+                  <p>Error loading starred files</p>
+                </div>
+              `;
+            })
+            .finally(() => {
+              hideLoader();
+            });
+        }
+
+        function loadTrashedFiles() {
+          showLoader("Loading trashed files...");
+
+          fetch("/list-trashed-files")
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                allFiles = data.files;
+                displayFiles(allFiles);
+                document.querySelector(".content-header h2").textContent =
+                  "Trash";
+              } else {
+                console.error("Failed to load trashed files:", data.error);
+                filesContainer.innerHTML = `
+                  <div class="empty-state">
+                    <i class="fas fa-trash"></i>
+                    <p>Trash is empty</p>
+                  </div>
+                `;
+              }
+            })
+            .catch((error) => {
+              console.error("Error loading trashed files:", error);
+              filesContainer.innerHTML = `
+                <div class="empty-state">
+                  <i class="fas fa-exclamation-circle"></i>
+                  <p>Error loading trashed files</p>
+                </div>
+              `;
+            })
+            .finally(() => {
+              hideLoader();
+            });
+        }
+
+        // Remove old share handler and add new functionality for sharing
+
+        // Share tabs functionality
+        document.querySelectorAll(".share-tab").forEach((tab) => {
+          tab.addEventListener("click", function () {
+            // Deactivate all tabs and hide content
+            document.querySelectorAll(".share-tab").forEach((t) => {
+              t.classList.remove("active");
+            });
+            document.querySelectorAll(".share-content").forEach((content) => {
+              content.style.display = "none";
+            });
+
+            // Activate clicked tab and show content
+            this.classList.add("active");
+            const tabId = this.dataset.tab;
+            document.getElementById(tabId + "Share").style.display = "block";
+          });
+        });
+
+        // Email sharing functionality
+        document
+          .getElementById("submitEmailShare")
+          .addEventListener("click", function () {
+            const fileId = document.getElementById("shareFileId").value;
+            const email = document.getElementById("shareEmail").value;
+            const role = document.getElementById("shareRole").value;
+
+            if (!email || !email.includes("@")) {
+              showStatus(
+                "Please enter a valid email address",
+                "error",
+                "shareStatusMessage"
+              );
+              return;
+            }
+
+            showLoader("Sharing file...");
+
+            // Call API to share file
+            fetch(
+              `/share-file?fileId=${fileId}&email=${encodeURIComponent(
+                email
+              )}&role=${role}`,
+              {
+                method: "POST",
+              }
+            )
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.success) {
+                  showStatus(
+                    "File shared successfully",
+                    "success",
+                    "shareStatusMessage"
+                  );
+
+                  // Clear input
+                  document.getElementById("shareEmail").value = "";
+                } else {
+                  showStatus(
+                    "Failed to share file: " + data.error,
+                    "error",
+                    "shareStatusMessage"
+                  );
+                }
+              })
+              .catch((error) => {
+                console.error("Error sharing file:", error);
+                showStatus(
+                  "Error sharing file. Please try again.",
+                  "error",
+                  "shareStatusMessage"
+                );
+              })
+              .finally(() => {
+                hideLoader();
+              });
+          });
+
+        // Link generation and copy functionality        document          .getElementById("generateLinkBtn")          .addEventListener("click", function () {            const fileId = document.getElementById("shareFileId").value;            const role = document.getElementById("linkPermission").value;                        showLoader("Creating shareable link...");                        // Call API to create shareable link with proper URL encoding            fetch(`/create-sharing-link?fileId=${encodeURIComponent(fileId)}&role=${encodeURIComponent(role)}`, {              method: "POST",            })              .then((response) => response.json())              .then((data) => {                if (data.success) {                  document.getElementById("shareLinkInput").value = data.link;                  showStatus(                    "Shareable link created successfully",                    "success",                    "shareStatusMessage"                  );                } else {                  showStatus(                    "Failed to create link: " + data.error,                    "error",                    "shareStatusMessage"                  );                }              })              .catch((error) => {                console.error("Error creating link:", error);                showStatus(                  "Error creating link. Please try again.",                  "error",                  "shareStatusMessage"                );              })              .finally(() => {                hideLoader();              });          });                document          .getElementById("copyLinkBtn")          .addEventListener("click", function () {            const linkInput = document.getElementById("shareLinkInput");            if (!linkInput.value) {              showStatus(                "No link available to copy. Generate a link first.",                "error",                "shareStatusMessage"              );              return;            }                        // Copy to clipboard            linkInput.select();            document.execCommand("copy");                        showStatus(              "Link copied to clipboard",              "success",              "shareStatusMessage"            );          });        // Social sharing functionality        document          .getElementById("whatsappShareBtn")          .addEventListener("click", function () {            const fileName = document.getElementById("shareFileName").value;            const fileLink =              document.getElementById("shareLinkInput").value ||              fileContextMenu.dataset.fileLink;            if (!fileLink) {              showStatus(                "No link available to share",                "error",                "shareStatusMessage"              );              return;            }            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`Check out this file: ${fileName} - ${fileLink}`)}`;            window.open(whatsappUrl, "_blank");          });
+
+        document
+          .getElementById("facebookShareBtn")
+          .addEventListener("click", function () {
+            const fileLink =
+              document.getElementById("shareLinkInput").value ||
+              fileContextMenu.dataset.fileLink;
+            if (!fileLink) {
+              showStatus(
+                "No link available to share. Generate a link first.",
+                "error",
+                "shareStatusMessage"
+              );
+              return;
+            }
+            const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+              fileLink
+            )}`;
+            window.open(facebookUrl, "_blank");
+          });
+        document
+          .getElementById("twitterShareBtn")
+          .addEventListener("click", function () {
+            const fileName = document.getElementById("shareFileName").value;
+            const fileLink =
+              document.getElementById("shareLinkInput").value ||
+              fileContextMenu.dataset.fileLink;
+            if (!fileLink) {
+              showStatus(
+                "No link available to share. Generate a link first.",
+                "error",
+                "shareStatusMessage"
+              );
+              return;
+            }
+            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+              `Check out this file: ${fileName}`
+            )}&url=${encodeURIComponent(fileLink)}`;
+            window.open(twitterUrl, "_blank");
+          });
+        document
+          .getElementById("linkedinShareBtn")
+          .addEventListener("click", function () {
+            const fileLink =
+              document.getElementById("shareLinkInput").value ||
+              fileContextMenu.dataset.fileLink;
+            if (!fileLink) {
+              showStatus(
+                "No link available to share. Generate a link first.",
+                "error",
+                "shareStatusMessage"
+              );
+              return;
+            }
+            const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
+              fileLink
+            )}`;
+            window.open(linkedinUrl, "_blank");
+          });
+      });
+    </script>
+  </body>
+</html>
