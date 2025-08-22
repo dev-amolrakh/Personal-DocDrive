@@ -1,7 +1,7 @@
 {
-  "name": "docdrive",
+  "name": "personal-docdrive",
   "version": "1.0.0",
-  "description": "A powerful web application for managing files on Google Drive with an intuitive interface. Upload, organize, share, and manage your Google Drive files effortlessly through a modern web interface.",
+  "description": "Personal DocDrive - A powerful web application for managing files on Google Drive with an intuitive interface. Upload, organize, share, and manage your Google Drive files effortlessly through a modern web interface.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

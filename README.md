@@ -1,8 +1,8 @@
-# DocDrive - Google Drive Document Manager
+# Personal DocDrive - Google Drive Document Manager
 
 A powerful web application for managing files on Google Drive with an intuitive interface. Upload, organize, share, and manage your Google Drive files effortlessly through a modern web interface.
 
-![DocDrive](https://img.shields.io/badge/Status-Active-brightgreen)
+![Personal DocDrive](https://img.shields.io/badge/Status-Active-brightgreen)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 ![Node.js](https://img.shields.io/badge/Node.js-v14+-green)
 
@@ -10,94 +10,15 @@ A powerful web application for managing files on Google Drive with an intuitive 
 
 <div align="center">
 
-### 🖼️ Application Interface
+<img src="./cloud-app/screenshots/main-dashboard.png" alt="Personal DocDrive Application" width="100%" style="border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
 
-<!-- Image Slider - Your actual DocDrive screenshots -->
-<details>
-<summary>🏠 <b>Main Dashboard</b> - Click to view</summary>
+<img src="./cloud-app/screenshots/file-preview.png" alt="Personal DocDrive Application" width="100%" style="border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
 
-![Main Dashboard](./screenshots/main-dashboard.png)
-*Clean and intuitive main interface showing file grid view with folders, search functionality, and organized file display*
+<img src="./cloud-app/screenshots/upload-interface.png" alt="Personal DocDrive Application" width="100%" style="border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
 
-</details>
-
-<details>
-<summary>�️ <b>File Preview</b> - Click to view</summary>
-
-![File Preview](./screenshots/file-preview.png)
-*Full-screen file preview modal allowing users to view images and documents directly in the browser*
-
-</details>
-
-<details>
-<summary>📤 <b>Upload Interface</b> - Click to view</summary>
-
-![Upload Interface](./screenshots/upload-interface.png)
-*Intuitive upload modal with folder selection, file picker, and real-time upload progress tracking*
-
-</details>
-
-<details>
-<summary>⚙️ <b>File Operations Menu</b> - Click to view</summary>
-
-![File Operations](./screenshots/context-menu.png)
-*Comprehensive context menu with options for preview, rename, share, move, add to favorites, color labeling, and trash management*
-
-</details>
-
-<details>
-<summary>� <b>Folder Organization</b> - Click to view</summary>
-
-![Folder Management](./screenshots/main-dashboard.png)
-*Sidebar navigation showing organized folder structure with color-coded folders and easy navigation*
-
-</details>
+<img src="./cloud-app/screenshots/context-menu.png" alt="Personal DocDrive Application" width="100%" style="border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"/>
 
 </div>
-
-### 🎯 Screenshots Included
-
-✅ **Screenshots are now included in the repository!**
-
-**File structure:**
-```
-cloud-app/
-├── screenshots/
-│   ├── main-dashboard.png      # Main interface overview
-│   ├── file-preview.png        # File preview modal
-│   ├── upload-interface.png    # Upload dialog
-│   ├── context-menu.png        # File operations menu
-│   └── README.md              # Screenshots documentation
-└── README.md
-```
-
-**To add the actual images:**
-1. Save your screenshots in the `screenshots/` folder with these exact names:
-   - `main-dashboard.png` (your first screenshot)
-   - `file-preview.png` (your second screenshot) 
-   - `upload-interface.png` (your third screenshot)
-   - `context-menu.png` (your fourth screenshot)
-
-2. The images will automatically appear in the slider sections above!
-
-```
-cloud-app/
-├── screenshots/
-│   ├── main-dashboard.png
-│   ├── file-management.png
-│   ├── color-organization.png
-│   ├── upload-interface.png
-│   ├── sharing-panel.png
-│   └── mobile-view.png
-└── README.md
-```
-
-**Alternative: Use GitHub Issues for Images**
-
-1. Create a new issue in your repository
-2. Drag & drop your screenshots into the issue description
-3. Copy the generated URLs and use them in README
-4. You can close the issue after copying URLs
 
 ---
 
@@ -145,8 +66,8 @@ cloud-app/
 1. **Clone the repository**
 
    ```bash
-   git clone <your-repository-url>
-   cd cloud-app
+   git clone https://github.com/dev-amolrakh/Personal-DocDrive.git
+   cd Personal-DocDrive/cloud-app
    ```
 
 2. **Install dependencies**
@@ -228,14 +149,26 @@ GOOGLE_APPLICATION_CREDENTIALS=./credentials.json
 ## 📂 Project Structure
 
 ```
-cloud-app/
-├── server.js              # Main server file
-├── package.json           # Dependencies and scripts
-├── credentials.json       # Google API credentials (not in repo)
-├── public/                # Static files
-│   └── index.html        # Main frontend application
-├── uploads/              # Temporary upload directory
-└── README.md            # Project documentation
+Personal-DocDrive/
+├── README.md              # Main project documentation
+├── cloud-app/             # Main application directory
+│   ├── server.js          # Main server file
+│   ├── package.json       # Dependencies and scripts
+│   ├── credentials.json   # Google API credentials (not in repo)
+│   ├── .gitignore         # Git ignore file
+│   ├── LICENSE            # MIT License
+│   ├── SETUP.md           # Detailed setup guide
+│   ├── CONTRIBUTING.md    # Contributing guidelines
+│   ├── public/            # Static files
+│   │   └── index.html     # Main frontend application
+│   ├── uploads/           # Temporary upload directory
+│   └── screenshots/       # Project screenshots
+│       ├── main-dashboard.png
+│       ├── file-preview.png
+│       ├── upload-interface.png
+│       ├── context-menu.png
+│       └── README.md      # Screenshots documentation
+└── .git/                  # Git repository files
 ```
 
 ## 🛠️ API Endpoints
