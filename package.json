@@ -1,0 +1,21 @@
+{
+  "name": "personal-docdrive",
+  "version": "1.0.0",
+  "description": "Personal Document Drive",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"No tests specified\" && exit 0",
+    "build": "echo \"No build specified\" && exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dev-amolrakh/Personal-DocDrive.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^8.0.0"
+  }
+}
