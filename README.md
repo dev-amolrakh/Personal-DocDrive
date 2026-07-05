@@ -8,9 +8,8 @@ A powerful web application for managing files on Google Drive with an intuitive 
 
 ---
 ## 👤 Credit
-
 Built and designed by **Amol Rakh**  (**Software Developer**)
-
+---
 
 ## 📸 Project Screenshots
 
