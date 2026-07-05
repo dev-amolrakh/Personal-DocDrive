@@ -6,6 +6,12 @@ A powerful web application for managing files on Google Drive with an intuitive 
 ![License](https://img.shields.io/badge/License-MIT-blue)
 ![Node.js](https://img.shields.io/badge/Node.js-v14+-green)
 
+---
+## 👤 Credit
+
+Built and designed by **Amol Rakh**  (**Software Developer**)
+
+
 ## 📸 Project Screenshots
 
 <div align="center">
